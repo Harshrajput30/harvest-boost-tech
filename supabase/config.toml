@@ -1,0 +1,7 @@
+project_id = "ewrsmorqoxpxrazposrq"
+
+[functions.analyze-crop]
+verify_jwt = false
+
+[functions.farm-chat]
+verify_jwt = false

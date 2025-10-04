@@ -1,12 +1,33 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useRef } from "react";
+import { Hero } from "@/components/Hero";
+import { CropAnalysis } from "@/components/CropAnalysis";
+import { FarmAssistant } from "@/components/FarmAssistant";
+import { FarmingTips } from "@/components/FarmingTips";
 
 const Index = () => {
+  const diseaseDetectionRef = useRef<HTMLDivElement>(null);
+
+  const scrollToDiseaseDetection = () => {
+    diseaseDetectionRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div className="min-h-screen">
+      <Hero onScrollToDiseaseDetection={scrollToDiseaseDetection} />
+      <div ref={diseaseDetectionRef}>
+        <CropAnalysis />
       </div>
+      <FarmAssistant />
+      <FarmingTips />
+      
+      {/* Footer */}
+      <footer className="bg-card border-t py-8">
+        <div className="container mx-auto px-4 text-center text-muted-foreground">
+          <p className="text-sm">
+            © 2025 Smart Farm AI. Empowering farmers with AI technology.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 };
