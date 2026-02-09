@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const VERSION = "2026-02-05-dataurl-fix";
+const VERSION = "2026-02-09-speed-boost";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -32,7 +32,8 @@ serve(async (req) => {
     // NOTE: Google provider often rejects data: URLs for image_url.
     // The browser upload flow produces data:image/...;base64,... so we use an OpenAI vision model for that case.
     const isDataUrl = imageStr.startsWith("data:image/");
-    const model = isDataUrl ? "openai/gpt-5-mini" : "google/gemini-2.5-flash";
+    // Use fast models: nano for base64 data URLs, flash-lite for regular URLs
+    const model = isDataUrl ? "openai/gpt-5-nano" : "google/gemini-2.5-flash-lite";
 
     console.log("[analyze-crop] analyzing", {
       v: VERSION,
@@ -53,7 +54,7 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: "You are an expert agricultural AI assistant specializing in crop disease detection. Analyze crop images and provide detailed diagnosis including: disease name, severity level (low/medium/high), symptoms, causes, and treatment recommendations. Be specific and practical."
+            content: "You are an agricultural AI. Analyze crop images concisely. Return: disease name, severity (low/medium/high), symptoms, cause, and treatment. Be brief and practical."
           },
           {
             role: "user",
