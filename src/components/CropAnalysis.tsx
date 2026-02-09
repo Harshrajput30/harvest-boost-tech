@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { Upload, Loader2, Camera } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -32,11 +33,44 @@ function compressImage(dataUrl: string): Promise<string> {
   });
 }
 
+const ESTIMATED_SECONDS = 15;
+
 export const CropAnalysis = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<string | null>(null);
+  const [progress, setProgress] = useState(0);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const { toast } = useToast();
+
+  // Progress timer that simulates estimated progress
+  useEffect(() => {
+    if (isAnalyzing) {
+      setProgress(0);
+      setElapsedSeconds(0);
+      timerRef.current = setInterval(() => {
+        setElapsedSeconds((prev) => {
+          const next = prev + 1;
+          // Asymptotic curve: approaches 95% but never reaches 100% until done
+          const pct = Math.min(95, (next / ESTIMATED_SECONDS) * 80 + (1 - Math.exp(-next / 8)) * 15);
+          setProgress(pct);
+          return next;
+        });
+      }, 1000);
+    } else {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      if (analysis) {
+        setProgress(100);
+      }
+    }
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [isAnalyzing, analysis]);
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -56,6 +90,13 @@ export const CropAnalysis = () => {
     }
   };
 
+  const getTimeRemaining = () => {
+    const remaining = Math.max(0, ESTIMATED_SECONDS - elapsedSeconds);
+    if (remaining <= 0 && isAnalyzing) return "Almost done...";
+    if (remaining === 1) return "~1 second remaining";
+    return `~${remaining} seconds remaining`;
+  };
+
   const analyzeCrop = async () => {
     if (!selectedImage) {
       toast({
@@ -67,6 +108,7 @@ export const CropAnalysis = () => {
     }
 
     setIsAnalyzing(true);
+    setAnalysis(null);
     try {
       const { data, error } = await supabase.functions.invoke("analyze-crop", {
         body: { image: selectedImage },
@@ -163,6 +205,16 @@ export const CropAnalysis = () => {
                   </>
                 )}
               </Button>
+
+              {/* Progress indicator */}
+              {(isAnalyzing || progress === 100) && (
+                <div className="space-y-2 animate-in fade-in duration-300">
+                  <Progress value={progress} className="h-2" />
+                  <p className="text-xs text-muted-foreground text-center">
+                    {isAnalyzing ? getTimeRemaining() : "Analysis complete!"}
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
