@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Upload, Loader2, Camera } from "lucide-react";
+import { Upload, Loader2, Camera, ImagePlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import cropAnalysisImage from "@/assets/crop-analysis.jpg";
@@ -42,6 +42,8 @@ export const CropAnalysis = () => {
   const [progress, setProgress] = useState(0);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   // Progress timer that simulates estimated progress
@@ -172,18 +174,53 @@ export const CropAnalysis = () => {
                       alt="Crop analysis placeholder"
                       className="w-32 h-32 object-cover rounded-lg mb-4 opacity-50"
                     />
-                    <Upload className="w-12 h-12 text-muted-foreground mb-2" />
+                    <Camera className="w-12 h-12 text-muted-foreground mb-2" />
                     <p className="text-sm text-muted-foreground">
-                      Click to upload or drag and drop
+                      Use the buttons below to capture or upload
                     </p>
                   </div>
                 )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                />
+              </div>
+
+              {/* Hidden file inputs */}
+              <input
+                ref={cameraInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={handleImageUpload}
+                className="hidden"
+              />
+              <input
+                ref={galleryInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+              />
+
+              {/* Camera + Gallery buttons */}
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="lg"
+                  onClick={() => cameraInputRef.current?.click()}
+                  className="w-full"
+                >
+                  <Camera className="w-5 h-5 mr-2" />
+                  Take Photo
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="lg"
+                  onClick={() => galleryInputRef.current?.click()}
+                  className="w-full"
+                >
+                  <ImagePlus className="w-5 h-5 mr-2" />
+                  Upload Image
+                </Button>
               </div>
 
               <Button
