@@ -3,6 +3,7 @@ import { Hero } from "@/components/Hero";
 import { CropAnalysis } from "@/components/CropAnalysis";
 import { FarmAssistant } from "@/components/FarmAssistant";
 import { FarmingTips } from "@/components/FarmingTips";
+import { GovtUpdates } from "@/components/GovtUpdates";
 
 const Index = () => {
   const diseaseDetectionRef = useRef<HTMLDivElement>(null);
@@ -18,6 +19,7 @@ const Index = () => {
         <CropAnalysis />
       </div>
       <FarmAssistant />
+      <GovtUpdates />
       <FarmingTips />
       
       {/* Footer */}
