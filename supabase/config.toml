@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.farm-chat]
 verify_jwt = false
+
+[functions.govt-updates]
+verify_jwt = false
