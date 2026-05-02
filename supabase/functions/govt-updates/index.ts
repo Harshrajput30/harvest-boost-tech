@@ -17,6 +17,11 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const region = body?.region || "India";
 
+    const now = new Date();
+    const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    const currentMonth = monthNames[now.getMonth()];
+    const currentYear = now.getFullYear();
+
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -28,11 +33,11 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: "You are an agricultural policy assistant. Generate a list of the most relevant and recent government updates, schemes, subsidies, MSP announcements, advisories and notifications affecting farmers and crops. Respond ONLY via the provided tool.",
+            content: `You are an agricultural policy assistant. Today's date is ${currentMonth} ${currentYear}. Generate the most recent government updates, schemes, subsidies, MSP announcements, advisories and notifications affecting farmers and crops. ALL dates MUST be from ${currentYear} (preferably the last 3 months ending in ${currentMonth} ${currentYear}). DO NOT use dates from previous years. Respond ONLY via the provided tool.`,
           },
           {
             role: "user",
-            content: `Provide 8 latest government updates for farmers in ${region}. Include subsidies, schemes (PM-KISAN, PMFBY, etc.), MSP changes, weather/pest advisories, and crop-specific notifications. Use realistic, plausible info.`,
+            content: `Provide 8 latest government updates for farmers in ${region}, all dated within ${currentYear} (most recent first, ending around ${currentMonth} ${currentYear}). Include subsidies, schemes (PM-KISAN, PMFBY, etc.), MSP changes, weather/pest advisories, and crop-specific notifications relevant to the current Kharif/Rabi season. Use realistic, plausible info reflecting ${currentYear} policies.`,
           },
         ],
         tools: [
